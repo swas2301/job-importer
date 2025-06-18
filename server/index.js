@@ -15,7 +15,7 @@ const server = http.createServer(app);
 initSocket(server);
 
 app.use(cors({
-    origin: 'https://job-importer-mu.vercel.app/',
+    origin: 'https://job-importer-mu.vercel.app',
   }));
   
 app.use(express.json());
