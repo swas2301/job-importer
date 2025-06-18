@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { fetchImportLogs } from '../lib/api';
-import { io, Socket } from 'socket.io-client';
 
 type FullJob = {
   jobId: string;
@@ -36,7 +35,7 @@ type ImportLog = {
   };
 };
 
-function formatDate(dateStr: string) {  //..
+function formatDate(dateStr: string) {
   const date = new Date(dateStr);
   return date.toLocaleString();
 }
@@ -45,64 +44,9 @@ export default function ImportHistoryPage() {
   const [logs, setLogs] = useState<ImportLog[]>([]);
 
   useEffect(() => {
-    // Initial fetch
     fetchImportLogs()
       .then(res => setLogs(res.data))
       .catch(err => console.error('Failed to fetch import logs:', err));
-
-    // Setup Socket.IO
-    const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL);
-
-    socket.on('jobStatus', (data) => {
-      console.log('📡 Real-time update:', data);
-
-      // Append new real-time update to logs
-      setLogs(prev => {
-        const updatedLogs = [...prev];
-        const index = updatedLogs.findIndex(log => log.feedUrl === data.feedUrl);
-
-        if (index !== -1) {
-          const log = updatedLogs[index];
-          if (data.type === 'new') {
-            log.newJobs.count += 1;
-            log.newJobs.jobs.push(data.job);
-          } else if (data.type === 'updated') {
-            log.updatedJobs.count += 1;
-            log.updatedJobs.jobs.push(data.job);
-          } else if (data.type === 'failed') {
-            log.failedJobs.count += 1;
-            log.failedJobs.jobs.push(data.job);
-          }
-          log.totalImported = log.newJobs.count + log.updatedJobs.count;
-        } else {
-          // If not found, create new log entry
-          updatedLogs.unshift({
-            feedUrl: data.feedUrl,
-            importDateTime: new Date().toISOString(),
-            totalFetched: 1,
-            totalImported: data.type !== 'failed' ? 1 : 0,
-            newJobs: {
-              count: data.type === 'new' ? 1 : 0,
-              jobs: data.type === 'new' ? [data.job] : [],
-            },
-            updatedJobs: {
-              count: data.type === 'updated' ? 1 : 0,
-              jobs: data.type === 'updated' ? [data.job] : [],
-            },
-            failedJobs: {
-              count: data.type === 'failed' ? 1 : 0,
-              jobs: data.type === 'failed' ? [data.job] : [],
-            },
-          });
-        }
-
-        return [...updatedLogs];
-      });
-    });
-
-    return () => {
-      socket.disconnect();
-    };
   }, []);
 
   return (
