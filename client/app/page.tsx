@@ -51,7 +51,7 @@ export default function ImportHistoryPage() {
       .catch(err => console.error('Failed to fetch import logs:', err));
 
     // Setup Socket.IO
-    const socket: Socket = io(process.env.BACKEND_URL);
+    const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL);
 
     socket.on('jobStatus', (data) => {
       console.log('📡 Real-time update:', data);
