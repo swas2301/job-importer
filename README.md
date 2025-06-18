@@ -1,6 +1,6 @@
 # 🛠️ Job Importer System
 
-A scalable job importer system that fetches job listings from multiple RSS/XML feeds, processes and stores them in MongoDB, tracks import logs with success/failure details, and provides real-time frontend updates using Socket.IO.
+A scalable job importer system that fetches job listings from multiple XML feeds, processes and stores them in MongoDB, tracks import logs with success/failure details, and provides real-time frontend updates using Socket.IO.
 
 ---
 
@@ -55,7 +55,7 @@ npm run dev
 ```
 ## 🌍 `.env` Configuration
 
-Create a `.env` file in your project root with the following:
+Create a `.env` file in your project backend(server) root with the following:
 
 ```env
 # MongoDB
