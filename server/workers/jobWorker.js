@@ -83,7 +83,7 @@ const worker = new Worker(
       ...redis.options,
       maxRetriesPerRequest: null,
     },
-    // Global retry logic (can also be applied per job when added to queue)
+    
     settings: {
       backoffStrategies: {
         exponential: (attemptsMade) => Math.pow(2, attemptsMade) * 1000,

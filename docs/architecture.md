@@ -18,6 +18,8 @@ The system is designed to:
 
 ## 🧱 Architecture Diagram
 
+![Architecture Diagram](./job-importer-diagram.png)
+
 
 
 ---
