@@ -14,7 +14,10 @@ const server = http.createServer(app);
 // Initialize socket server
 initSocket(server);
 
-app.use(cors());
+app.use(cors({
+    origin: 'https://your-frontend.vercel.app',
+  }));
+  
 app.use(express.json());
 app.use('/import-logs', importLogRoutes);
 
