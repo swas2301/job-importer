@@ -44,11 +44,29 @@ export default function ImportHistoryPage() {
   const [logs, setLogs] = useState<ImportLog[]>([]);
 
   useEffect(() => {
-    fetchImportLogs()
-      .then(res => setLogs(res.data))
-      .catch(err => console.error('Failed to fetch import logs:', err));
-  }, []);
+    const fetchAndSortLogs = async () => {
+      try {
+        const res = await fetchImportLogs();
 
+        // Sort logs by most recent date
+        const sortedLogs = res.data.sort(
+          (a: ImportLog, b: ImportLog) =>
+            new Date(b.importDateTime).getTime() -
+            new Date(a.importDateTime).getTime()
+        );
+
+        setLogs(sortedLogs);
+      } catch (err) {
+        console.error('Failed to fetch import logs:', err);
+      }
+    };
+
+    fetchAndSortLogs(); // initial fetch
+
+    const interval = setInterval(fetchAndSortLogs, 5000); // auto-fetch every 5 seconds
+
+    return () => clearInterval(interval); // clean up
+  }, []);
   return (
     <main className="p-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6 text-center">🧾 Import History</h1>
