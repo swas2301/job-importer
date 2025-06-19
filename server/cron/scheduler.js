@@ -5,7 +5,7 @@ const { Queue } = require("bullmq");
 const { resultsMap } = require("../workers/jobWorker");
 const ImportLog = require("../models/ImportLog");
 const redis = require("../config/redis");
-const http = require("http");
+
 
 const jobQueue = new Queue("job-importer", { connection: redis });
 

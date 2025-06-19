@@ -7,6 +7,7 @@ const importLogRoutes = require('./routes/importlog');
 const jobQueue = require("./queues/jobQueue"); // ✅ Import the queue here
 const { initSocket } = require("./socket");
 const http = require("http");
+const { startImportLogWatcher } = require('./workers/changeStream');
 
 const app = express();
 const server = http.createServer(app);
@@ -15,13 +16,15 @@ const server = http.createServer(app);
 initSocket(server);
 
 app.use(cors({
-    origin: 'https://job-importer-mu.vercel.app',
+    origin: '*',
   }));
   
 app.use(express.json());
 app.use('/import-logs', importLogRoutes);
 
-connectDB();
+connectDB().then(() => {
+    startImportLogWatcher(); // ✅ Start watching ImportLog
+  });
 
 // ✅ Immediately clear all jobs when the server starts
 (async () => {
@@ -42,5 +45,5 @@ connectDB();
   startScheduler();
 
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 })();

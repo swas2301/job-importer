@@ -8,6 +8,7 @@ router.get('/', async (req, res) => {
     res.json(logs);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch logs' });
+    console.error("Error fetching import logs:", err.message, err);
   }
 });
 

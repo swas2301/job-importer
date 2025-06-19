@@ -1,23 +1,10 @@
 const { Worker } = require("bullmq");
 const redis = require("../config/redis");
 const Job = require("../models/job");
-const ImportLog = require("../models/ImportLog");
-const { Server } = require("socket.io");
-const http = require("http");
+const { getIO } = require("../socket"); // ✅ Use shared socket instance
 
 require("dotenv").config();
 
-const server = http.createServer();
-const io = new Server(server, {
-  cors: {
-    origin: "*", // Or set to your frontend domain
-  },
-});
-server.listen(4001, () =>
-  console.log("🧠 Socket.IO worker server running on port 4001")
-);
-
-// Environment-configurable settings
 const MAX_CONCURRENCY = parseInt(process.env.MAX_CONCURRENCY);
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE);
 
@@ -44,6 +31,8 @@ const worker = new Worker(
         failedJobs: [],
       };
     }
+
+    const io = getIO(); // ✅ Use shared Socket.IO instance
 
     try {
       const existing = await Job.findOne({ jobId: jobData.jobId });
@@ -83,7 +72,6 @@ const worker = new Worker(
       ...redis.options,
       maxRetriesPerRequest: null,
     },
-    
     settings: {
       backoffStrategies: {
         exponential: (attemptsMade) => Math.pow(2, attemptsMade) * 1000,

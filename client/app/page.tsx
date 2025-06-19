@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchImportLogs } from '../lib/api';
+import { io, Socket } from 'socket.io-client';
 
 type FullJob = {
   jobId: string;
@@ -17,7 +17,8 @@ type FailedJob = FullJob & {
 };
 
 type ImportLog = {
-  feedUrl: string;
+  _id: string;
+  fileName: string;
   importDateTime: string;
   totalFetched: number;
   totalImported: number;
@@ -44,41 +45,42 @@ export default function ImportHistoryPage() {
   const [logs, setLogs] = useState<ImportLog[]>([]);
 
   useEffect(() => {
-    const fetchAndSortLogs = async () => {
-      try {
-        const res = await fetchImportLogs();
+    const socket: Socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
 
-        // Sort logs by most recent date
-        const sortedLogs = res.data.sort(
-          (a: ImportLog, b: ImportLog) =>
-            new Date(b.importDateTime).getTime() -
-            new Date(a.importDateTime).getTime()
-        );
+    socket.on('importLogUpdated', (updatedLog: ImportLog) => {
+      setLogs(prev => {
+        const existingIndex = prev.findIndex(log => log._id === updatedLog._id);
+        const updated = [...prev];
 
-        setLogs(sortedLogs);
-      } catch (err) {
-        console.error('Failed to fetch import logs:', err);
-      }
+        if (existingIndex !== -1) {
+          updated[existingIndex] = updatedLog;
+        } else {
+          updated.unshift(updatedLog);
+        }
+
+        return updated
+          .sort((a, b) => new Date(b.importDateTime).getTime() - new Date(a.importDateTime).getTime())
+          .slice(0, 100);
+      });
+    });
+
+    return () => {
+      socket.disconnect();
     };
-
-    fetchAndSortLogs(); // initial fetch
-
-    const interval = setInterval(fetchAndSortLogs, 5000); // auto-fetch every 5 seconds
-
-    return () => clearInterval(interval); // clean up
   }, []);
+
   return (
     <main className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center">🧾 Import History</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">🧾 Import History (Live)</h1>
 
       {logs.length === 0 ? (
         <p className="text-center text-gray-500">No import logs found.</p>
       ) : (
         <div className="space-y-6">
           {logs.map((log, index) => (
-            <div key={index} className="border rounded-lg p-4 shadow-sm bg-white">
+            <div key={log._id || index} className="border rounded-lg p-4 shadow-sm bg-white">
               <h2 className="text-lg font-semibold text-blue-600 break-all">
-                {log.feedUrl}
+                {log.fileName || 'Unknown Feed'}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 Imported on: {formatDate(log.importDateTime)}

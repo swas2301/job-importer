@@ -46,6 +46,11 @@ const ImportLogSchema = new mongoose.Schema({
     count: { type: Number, required: true },
     jobs: [FailedJobSchema],
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    expires: 10800, // ⏱️ 3 hours = 10800 seconds
+  },
 });
 
 module.exports = mongoose.model('ImportLog', ImportLogSchema);

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://job-importer.onrender.com';
+const API_BASE = 'http://localhost:5000';
 
 export const fetchImportLogs = () => axios.get(`${API_BASE}/import-logs`);
 
