@@ -86,6 +86,16 @@ Use `.env` to control:
 
 ---
 
+## 🔁 Scalable Design Thinking
+
+- The architecture separates concerns across worker, queue, API, and socket layers—making the codebase modular and maintainable.
+- Redis and MongoDB allow loosely coupled services, enabling easy migration to microservices later.
+- The job worker can run as a standalone service, while the API and real-time Socket.IO server can be scaled horizontally.
+- New features like feed monitoring, notifications, or admin dashboards can be plugged in without major rewrites.
+- Built with future growth in mind—supports integration of multiple feed sources and more processing pipelines.
+
+---
+
 
 ## 🔚 Conclusion
 
